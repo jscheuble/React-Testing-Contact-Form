@@ -8,6 +8,7 @@ const ContactForm = () => {
   });
   const onSubmit = data => {
     setData(data);
+    reset();
   };
 
   return (
@@ -32,7 +33,7 @@ const ContactForm = () => {
             id='lastName'
             name="lastName"
             placeholder="luo"
-            ref={register({ required: true })}
+            ref={register({ required: true, maxLength: 15 })}
           />
           {errors.lastName && (
             <p>Looks like there was an error: {errors.lastName.type}</p>

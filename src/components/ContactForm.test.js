@@ -56,7 +56,7 @@ test('contact form inputs rendered to screen after submit', async () => {
     const { findAllByText, findByLabelText } = render(<ContactForm />);
     const firstName = await findByLabelText(/first name/i);
     const lastName = await findByLabelText(/last name/i);
-    const email = await findByLabelText(/email/i)
+    const email = await findByLabelText(/email/i);
 
     fireEvent.change(firstName, {
         target: { name: 'firstName', value: 'Jana' }
@@ -74,4 +74,49 @@ test('contact form inputs rendered to screen after submit', async () => {
     await findAllByText(/jana/i);
     await findAllByText(/scheuble/i);
     await findAllByText(/jscheubs/i);
-})
+});
+
+test('testing error validation', async () => {
+    const { findAllByText, findByLabelText } = render(<ContactForm />);
+    const firstName = await findByLabelText(/first name/i);
+    const lastName = await findByLabelText(/last name/i);
+    const email = await findByLabelText(/email/i);
+
+    fireEvent.change(firstName, {
+        target: { name: 'firstName', value: '' }
+    });
+    fireEvent.change(lastName, {
+        target: { name: 'lastName', value: '' }
+    });
+    fireEvent.change(email, {
+        target: { name: 'email', value: '' }
+    });
+
+    fireEvent.click(document.getElementById('submit'));
+
+    await expect(findAllByText(/error/i).length === 3);
+});
+
+test('testing max length error validation on name input fields and that email is in correct format', async () => {
+    const { findByLabelText, findAllByText, getByLabelText } = render(<ContactForm />);
+    const firstName = await findByLabelText(/first name/i);
+    const lastName = await findByLabelText(/last name/i);
+    const email = getByLabelText(/email/i);
+
+    fireEvent.change(firstName, {
+        target: { name: 'firstName', value: 'Jana567891' }
+    });
+    fireEvent.change(lastName, {
+        target: { name: 'lastName', value: 'Scheuble1234567' }
+    });
+    fireEvent.change(email, {
+        target: { name: 'email', value: 'jscheubs@ymail.com' }
+    });
+
+    fireEvent.click(document.getElementById('submit'));
+
+    await findAllByText(/[@, .]/);
+
+    await expect(findAllByText(/error/i).length === 2);
+});
+
