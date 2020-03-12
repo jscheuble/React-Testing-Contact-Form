@@ -6,8 +6,26 @@ test('renders correctly', () => {
     render(<ContactForm />);
 });
 
-test('contact form adds customer info to page', () => {
-    const { getByLabelText, findByTestId } = render(<ContactForm />)
+test('contact form has first and last name inputs', () => {
+    const { findAllByText } = render(<ContactForm />);
+    const names = findAllByText(/name/i);
+    expect(names.length === 2);
+});
+
+test('contact form has email input', () => {
+    const { getByLabelText } = render(<ContactForm />);
+    const emailInput = getByLabelText(/email/i);
+    expect(emailInput).toBeInTheDocument();
+});
+
+test('contact form has message input', () => {
+    const { getByLabelText } = render(<ContactForm />);
+    const messageInput = getByLabelText(/message/i);
+    expect(messageInput).toBeInTheDocument();
+});
+
+test('contact form submits without errors', () => {
+    const { getByLabelText, findByTestId, queryAllByText } = render(<ContactForm />)
     const firstNameInput = getByLabelText(/first name/i);
     const lastNameInput = getByLabelText(/last name/i);
     const emailInput = getByLabelText(/email/i);
@@ -29,22 +47,31 @@ test('contact form adds customer info to page', () => {
     findByTestId('submit').then(res => {
         fireEvent.click(res);
     });
+
+    const errors = queryAllByText(/error/i);
+    expect(errors.length === 0);
 });
 
-test('contact form has first and last name inputs', () => {
-    const { findAllByText } = render(<ContactForm />);
-    const names = findAllByText(/name/i);
-    expect(names.length === 2);
-});
+test('contact form inputs rendered to screen after submit', async () => {
+    const { findAllByText, findByLabelText } = render(<ContactForm />);
+    const firstName = await findByLabelText(/first name/i);
+    const lastName = await findByLabelText(/last name/i);
+    const email = await findByLabelText(/email/i)
 
-test('contact form has email input', () => {
-    const { getByLabelText } = render(<ContactForm />);
-    const emailInput = getByLabelText(/email/i);
-    expect(emailInput).toBeInTheDocument();
-});
+    fireEvent.change(firstName, {
+        target: { name: 'firstName', value: 'Jana' }
+    });
+    fireEvent.change(lastName, {
+        target: { name: 'lastName', value: 'Scheuble' }
+    });
+    fireEvent.change(email, {
+        target: { name: 'email', value: 'jscheubs@ymail.com' }
+    });
 
-test('contact form has message input', () => {
-    const { getByLabelText } = render(<ContactForm />);
-    const messageInput = getByLabelText(/message/i);
-    expect(messageInput).toBeInTheDocument();
+    const submit = document.getElementById('submit');
+    fireEvent.click(submit);
+
+    await findAllByText(/jana/i);
+    await findAllByText(/scheuble/i);
+    await findAllByText(/jscheubs/i);
 })
